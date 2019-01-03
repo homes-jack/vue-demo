@@ -1,0 +1,9 @@
+组件清单
+  smcvNumberInput 数字输入框
+		v-model 绑定数据
+		mode 默认'number' 纯数字
+				 'decimal' 小数点两位
+
+	v_model loading组件
+		开启/关闭 localStorage.setItem('isModalShow',true/false)
+
