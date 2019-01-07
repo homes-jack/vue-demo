@@ -164,7 +164,7 @@
         },
 
         loadBottom() {
-          this.$emit('loadMore',()=>{
+          this.$emit('addData',()=>{
             this.$refs.loadmore.onBottomLoaded()
           })
         },
@@ -176,6 +176,7 @@
           const translateNum = +translate;
           this.translate = translateNum.toFixed(2);
           this.moveTranslate = (1 + translateNum / 70).toFixed(2);
+
         },
         loadTop() {
           if(!this.noReflesh){
@@ -186,13 +187,16 @@
             })
           }
         },
+
   },
       created() {
       },
+
       mounted() {
         setTimeout(()=>{
           this.reseizeHeight()
         })
       }
+
     };
   </script>

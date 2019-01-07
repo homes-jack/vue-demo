@@ -22,6 +22,7 @@
           class="wh_content_item"
           v-for="(tag,index) in textTop"
           :key="index"
+          :class="{weekend:tag == '六' || tag == '日'}"
         >
           <div class="wh_top_tag">
             {{tag}}
@@ -38,9 +39,10 @@
         >
           <div
             class="wh_item_date"
-            :class="[{ wh_isMark: item.isMark},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},{wh_is_rang:inActRange(item.date)},setClass(item)]">
+            :class="[{ wh_isMark: item.isMark},
+            {wh_show_point:showPoint},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},{wh_is_rang:inActRange(item.date)},setClass(item)]">
             {{item.id}}
-            <div class="point"></div>
+            <div v-if="showPoint" class="point"></div>
           </div>
         </div>
       </div>
@@ -49,7 +51,7 @@
 </template>
 <script>
 import timeUtil from './calendar';
-import { handDate } from "@/common/utils";
+import { handDate,copy } from "@/common/utils";
 export default {
   name:'calendar',
   data() {
@@ -58,13 +60,22 @@ export default {
       list: [],
       historyChose: [],
       dateTop: '',
-      isGo:true,
+      click_item:'',
+      textTop:['日', '一', '二', '三', '四', '五', '六']
     };
   },
   props: {
+    showPoint:{
+      type:Boolean,
+      default:false
+    },
+    loading:{
+      type:Boolean,
+      default:false
+    },
     actRange:{
       type:Array,
-      default:()=>['1970-01-01','2050-12-31']
+      default:()=>['1970/1/1','2050/12/31']
     },
     showWeek:{
       type:Boolean,
@@ -82,13 +93,9 @@ export default {
       type: Array,
       default: () => []
     },
-    textTop: {
-      type: Array,
-      default: () => ['日', '一', '二', '三', '四', '五', '六']
-    },
     sundayStart: {
       type: Boolean,
-      default: () => false
+      default:true
     },
     agoDayHide: { type: String, default: `0` },
     futureDayHide: { type: String, default: `2554387200` }
@@ -97,16 +104,23 @@ export default {
     this.intStart();
     this.myDate = new Date();
     if(this.firstCheck) {
+      let f_check = handDate(this.firstCheck,'yyyy/MM/dd',false)
       this.myDate = new Date(this.firstCheck)
-      this.historyChose.push(this.firstCheck)
+      this.historyChose.push(f_check)
     }
   },
   methods: {
     intStart() {
       timeUtil.sundayStart = this.sundayStart;
+      if(!this.sundayStart) {
+        this.textTop = ['一', '二', '三', '四', '五', '六','日']
+      }
     },
     inActRange(date){
-      let day = handDate(date);
+      let day = handDate(date,'yyyy/MM/dd');
+      if(this.actRange.length < 2) {
+        return true
+      }
       if(this.actRange[0] <= day && day <= this.actRange[1]) {
         return true;
       }
@@ -121,8 +135,17 @@ export default {
       return obj;
     },
     clickDay(item) {
-      this.$emit('beforeChange',item);
-      if(!this.isGo) return;
+      this.click_item = item;
+      if(this.loading) {
+        let obj = copy(item);
+        obj.date = handDate(obj.date,'yyyy/MM/dd');
+        this.$emit('load',obj,this.hand_click_day)
+      }else {
+        this.hand_click_day()
+      }
+    },
+    hand_click_day(){
+      let item = this.click_item
       if (item.otherMonth === 'nowMonth' && !item.dayHide) {
         this.getList(this.myDate, item.date);
       }
@@ -260,8 +283,9 @@ export default {
     },
     firstCheck(){
       if(this.firstCheck) {
-        this.myDate = new Date(this.firstCheck)
-        this.historyChose.push(this.firstCheck);
+        let f_check = handDate(this.firstCheck,'yyyy/MM/dd',false);
+        this.myDate = new Date(this.firstCheck);
+        this.historyChose.push(f_check);
         this.getList(this.myDate);
       }
     },
@@ -331,14 +355,16 @@ export default {
     text-align: center;
     position: relative;
   }
-  .wh_week .wh_content_item:first-child,
-  .wh_week .wh_content_item:last-child {
+  .wh_week .wh_content_item.weekend{
     color: #6ABAF9;
   }
   .wh_date {
     color: #dcdcdc;
-    .wh_item_date.wh_is_rang {
-      color: #666;
+    .wh_item_date {
+      color: #bfbfbf;
+      &.wh_is_rang {
+        color: #666;
+      }
       // .point {
       //   background-color:#4E8EFF;
       // }
@@ -356,11 +382,15 @@ export default {
     }
     .wh_item_date {
       width: 40px;
-      height: 45px;
-      line-height: 30px;
+      height: 40px;
+      line-height: 40px;
       font-size: 14px;
       text-align: center;
       margin: auto;
+      &.wh_show_point {
+        height: 45px;
+        line-height: 30px;
+      }
       &.wh_chose_day {
         background: #4E8EFF;
         border-radius: 5px;
@@ -404,7 +434,7 @@ export default {
     background: blue;
     z-index: 2;
   }
-  .wh_content_item .wh_other_dayhide {
+  .wh_content_item .wh_other_dayhide.wh_item_date {
     color: #bfbfbf;
   }
   .wh_content_item .wh_want_dayhide {

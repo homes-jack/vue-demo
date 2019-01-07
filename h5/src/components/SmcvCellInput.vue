@@ -1,32 +1,30 @@
 <template>
   <div class="smcv_publicBox">
-    <span class="title">{{title}}</span>
-    <div class="ipt_box">
-      <smcv-input :number='isNumber' :isDouble="isDouble" v-if="isEdit" class="pd5" type="text" placeholder="请输入" v-model="cust_name"/>
+    <span class="smcv_cell_title">{{title}}</span>
+    <div class="smcv_cell_ipt_box">
+      <input
+        v-if="edit"
+        class="smcv_cell_pd5"
+        type="text"
+        :placeholder="placeholder"
+        v-model="cust_name"
+      />
       <i
-        v-if="isEdit && clearable && (cust_name+'').length"
+        v-if="edit && clearable && (cust_name+'').length"
         class="iconfont icon--zhuangtai-cuowu"
         @click="clear"
       ></i>
       <span
-        v-if="!isEdit"
-        :class="{ipt_nodata:!(cust_name || (cust_name + '') === '0')}"
-      >{{(cust_name || (cust_name + '') === '0')?cust_name:'暂无信息'}}</span>
+        v-if="!edit"
+        :class="{smcv_cell_ipt_nodata:!(cust_name || (cust_name + '') === '0')}"
+      >{{(cust_name || (cust_name + '') === '0')?cust_name:no_data_str}}</span>
     </div>
   </div>
 </template>
 <script>
-import SmcvInput from "./SmcvInput.vue";
 export default {
   name:'smcvCellInput',
-  components: {
-    SmcvInput
-  },
   props: {
-    clearable:{
-      type:Boolean,
-      default:true,
-    },
     title:{
       type:String,
       default:'姓名'
@@ -35,17 +33,25 @@ export default {
       type:[String,Number],
       default:''
     },
-    isEdit:{
+    edit:{
       type:Boolean,
       default:false
     },
-    isNumber:{
-      type:Boolean,
-      default:true
-    },
-    isDouble:{
+    number:{
       type:Boolean,
       default:false
+    },
+    clearable:{
+      type:Boolean,
+      default:true,
+    },
+    placeholder:{
+      type:String,
+      default:'请输入'
+    },
+    no_data_str:{
+      type:String,
+      default:''
     }
   },
   created () {
@@ -66,8 +72,8 @@ export default {
       this.cust_name = this.value
     },
     cust_name(now){
-      if(now.length >= 1 && this.isNumber) {
-        now = Number(now) + '';
+      if(now.length >= 1 && this.number) {
+        now = now.replace(/[^0-9]/g, "");
       }
       this.cust_name = now;
       this.$emit('input',this.cust_name)
@@ -83,14 +89,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #DCDCDC;
-  .ipt_nodata {
+  .smcv_cell_ipt_nodata {
     color: #C9C9C9;
   }
-  .title {
+  .smcv_cell_title {
     color: #333;
     font-size: 16px;
+    flex: 1;
   }
-  .ipt_box {
+  .smcv_cell_ipt_box {
     position: relative;
     input {
       line-height: 30px;

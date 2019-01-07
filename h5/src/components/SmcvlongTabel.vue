@@ -2,11 +2,11 @@
   <div class="longTabel">
     <div class="lt_left">
       <div
-        v-for="(item,index) in lt_left"
+        v-for="(item,index) in option_list"
         :key="index"
         class="lt_left_item"
       >
-        {{item.name}}
+        {{index==0?'':item.name}}
       </div>
     </div>
     <div class="lt_content">
@@ -15,23 +15,23 @@
         v-for="(item,index) in res_lt_list"
         :key="index"
       >
-        <div class="lt_conten_date">{{item[option.head]?item[option.head]:'--'}}</div>
+        <div class="lt_conten_date">{{item[option_list[0].label]?item[option_list[0].label]:'--'}}</div>
         <div
           class="lt_conten_detail"
-          v-for="(leftItem,leftIndex) in lt_left"
+          v-for="(leftItem,leftIndex) in option_list"
           :key="leftIndex"
           v-if="leftIndex != 0"
         >
-          <p class="lt_content_number">{{(item[lt_left[leftIndex].label] || item[lt_left[leftIndex].label] == 0)?item[lt_left[leftIndex].label]:'--'}}</p>
+          <p class="lt_content_number">{{(item[option_list[leftIndex].label] || item[option_list[leftIndex].label] == 0)?item[option_list[leftIndex].label]:'--'}}</p>
         </div>
 
       </div>
     </div>
-    <div class="lt_right">
-      <div class="lt_right_title">{{lt_right[0].name}}</div>
+    <div class="lt_right" v-if="showAll">
+      <div class="lt_right_title">{{option_list[0].name}}</div>
       <div
         class="lt_right_all"
-        v-for="(item,index) in lt_right"
+        v-for="(item,index) in option_list"
         :key="index"
         v-if="index != 0"
       >
@@ -47,56 +47,33 @@ import { copy } from "@/common/utils";
   export default {
     name: "longTabel",
     props: {
-      lt_left:{
-        type:Array,
-        default(){
-          return [
-            {},
-            {name:'D90',label:'d90'},
-            {name:'T60',label:'t60'},
-            {name:'G10',label:'g10'},
-            {name:'V80',label:'v80'},
-            {name:'RV80',label:'rv80'},
-            {name:'G50',label:'g50'},
-            {name:'EG10',label:'eg10'},
-            {name:'RG10',label:'rg10'},
-          ]
-        }
-      },
-      lt_right:{
-        type:Array,
-        default(){
-          return [
-            {name:'汇总'},
-            {name:'D90',label:'d90'},
-            {name:'T60',label:'t60'},
-            {name:'G10',label:'g10'},
-            {name:'V80',label:'v80'},
-            {name:'RV80',label:'rv80'},
-            {name:'G50',label:'g50'},
-            {name:'EG10',label:'eg10'},
-            {name:'RG10',label:'rg10'},
-          ]
-        }
-      },
       lt_list:{
         type:Array,
         default(){
           return [{}]
         }
       },
-      option:{
-        type:Object,
+      option_list:{
+        type:Array,
         default(){
-          return {
-            head:'activityDateString'
-          }
+          return [
+            {name:'汇总',label:'activityDateString'},
+            {name:'D90',label:'d90'},
+            {name:'T60',label:'t60'},
+            {name:'G10',label:'g10'},
+            {name:'V80',label:'v80'},
+            {name:'RV80',label:'rv80'},
+          ]
         }
+      },
+      showAll:{
+        type:Boolean,
+        default:false
       }
     },
     data(){
       return {
-        res_lt_list:[]
+        res_lt_list:[],
       }
     },
     created () {
@@ -105,9 +82,11 @@ import { copy } from "@/common/utils";
     methods: {
       updatList () {
         this.res_lt_list = copy(this.lt_list);
-        if(this.res_lt_list.length<4) {
-          this.res_lt_list.length = 4;
-          this.res_lt_list.fill({},this.lt_list.length,5)
+        let length = 4;
+        if(!this.showAll) length = 5
+        if(this.res_lt_list.length < length) {
+          this.res_lt_list.length = length;
+          this.res_lt_list.fill({},this.lt_list.length,length+1)
         }
       },
       cptAll(key){
@@ -192,5 +171,4 @@ import { copy } from "@/common/utils";
     word-wrap: break-word;
   }
 }
-
 </style>
