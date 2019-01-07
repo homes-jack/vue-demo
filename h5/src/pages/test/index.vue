@@ -5,8 +5,7 @@
     <smcv-input-pop
       v-model="show"
       title="test"
-      type="cascading"
-      :data="data_list"
+      type="date"
       :default="default_data"
       @sendDate="getdata"
       @loading="loading"
@@ -46,7 +45,7 @@ export default {
     return {
       show: false,
       data_list,
-      pop_data:'',
+      pop_data:{data:''},
       default_data:'',
       id:10012001,
     };
@@ -69,7 +68,7 @@ export default {
       }, 800);
     },
     getdata(d){
-      this.pop_data = d
+      this.pop_data = d;
     }
   }
 };

@@ -67,6 +67,11 @@
 				</div>
 			</div>
 
+      <div v-if="type === 'date'" class="datepick" @touchmove="ios_gundong">
+        <smcv-date-picker v-model='time' :defalut='defalutTime'></smcv-date-picker>
+      </div>
+
+
 		</div>
 	</mt-popup>
 </template>
@@ -88,6 +93,8 @@ export default {
 			cascading_arr:[],
 			cut_cascading_item:{},
       currentCascader: 1,
+      defalutTime:'',
+      time:''
     };
   },
   props: {
@@ -183,6 +190,15 @@ export default {
             });
           }
           break;
+        case 'date':
+          if(!this.default){
+            this.defalutTime = handDate(new Date(),'yyyy-MM-dd hh:mm:ss');
+            setTimeout(()=>{this.defalutTime = this.default})
+          }else {
+            this.time = new Date(this.defalutTime);
+            this.defalutTime = this.default;
+          }
+          break;
       }
     },
     leave(isOk) {
@@ -210,8 +226,10 @@ export default {
 							obj.data[i] = this.cascading_arr[i + 1]
 						}
           }
-					this.active = "";
-          this.currentCascader = 1;
+          break;
+        case 'date' :
+          obj.data = handDate(this.time,'yyyy-MM-dd');
+          this.defalutTime = obj.data;
           break;
       }
 
@@ -257,6 +275,7 @@ export default {
     // 级联tab点击
     cascaderTab(index) {
 			if (!this.cascading_arr[index]) return;
+      if(this.cascading_arr[index].disabled) return;
 			this.currentCascader = index;
 			this.active = this.cascading_arr[index][this.option.id];
     },
