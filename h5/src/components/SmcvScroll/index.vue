@@ -18,7 +18,7 @@
         @bottom-status-change="handleBottomChange"
         :bottom-all-loaded="allLoaded"
         ref="loadmore"
-        :auto-fill=false
+        :auto-fill="false"
         :bottomDistance="-10"
       >
         <div slot="top" class="mint-loadmore-top">
