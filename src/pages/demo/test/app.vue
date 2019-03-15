@@ -29,6 +29,7 @@ export default {
   mounted() {
     let cv = document.querySelector("#cv");
     let ctx = cv.getContext("2d");
+    console.log(ctx);
     this.ctx = ctx;
     ctx.lineWidth = 1;
     this.draw(ctx)

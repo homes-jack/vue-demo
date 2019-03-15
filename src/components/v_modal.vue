@@ -4,7 +4,6 @@
       <i class="el-icon-loading"></i>
     <p class="el-loading-text">Loading</p>
   </div>
-  </div>
 </template>
 
 <script>
