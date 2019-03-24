@@ -80,8 +80,18 @@ export default {
     //读取  get只取一条数据
     get(db,store='person') {
       return new Promise((reslove,rej)=>{
-        let request = this.create_transaction(db,store).get(1)  
-        // 1 ==> 表主键对应值 get只取一条数据
+        let request = this.create_transaction(db,store).get(1) // 1 ==> 表主键对应值 get只取一条数据
+        //使用索引检索
+        // request = this.create_transaction(db,store).index('name').get('test11');
+        // request.onsuccess = function(e){
+        //   console.log(e.target.result);
+        //   if(e.target.result){
+
+        //   }else {
+            
+        //   }
+        // }
+        
         request.onsuccess = function (e) {
           if(request.result) {
             console.log("result",request.result);
