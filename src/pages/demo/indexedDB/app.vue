@@ -5,7 +5,7 @@
 <script>
 export default {
   name: "indexedDB",
-  
+
   data() {
     return {
       db:{
@@ -33,14 +33,14 @@ export default {
       console.log("数据库创建成功");
       this.create_store(db);
       // this.add(db);
-      this.get(db);
+      // this.get(db);
       // this.get_all(db);
       // this.update(db)
     },
     open_upgradeneeded(e){ //数据库升级、新增触发
       console.log("数据库升级成功");
       let db = e.target.result;
-      this.create_store(db); 
+      this.create_store(db);
     },
     open_err(e){
       console.log("数据库打开错误");
@@ -88,10 +88,10 @@ export default {
         //   if(e.target.result){
 
         //   }else {
-            
+
         //   }
         // }
-        
+
         request.onsuccess = function (e) {
           if(request.result) {
             console.log("result",request.result);
@@ -153,7 +153,7 @@ export default {
       })
     },
   },
-  
+
 };
 </script>
 
