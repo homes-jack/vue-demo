@@ -135,6 +135,7 @@ export default {
         if (typeof op[key] == "string" && (ob[key]+'').includes(op[key])) {
           is_right++;
         }
+        if(typeof op[key] == 'undefined') is_right++;
       });
       return is_right >= op_keys.length;
     }

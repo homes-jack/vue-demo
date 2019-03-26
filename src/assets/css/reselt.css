@@ -64,18 +64,8 @@ ul,ol {
 
 img {
   border: none;
-  vertical-align: middle;
 }
 
-a {
-  text-decoration: none;
-  color: #232323;
-}
-
-table {
-  border-collapse: collapse;
-  table-layout: fixed;
-}
 .titleP span ,
 .titleP a{
   color:#808080;
@@ -130,43 +120,6 @@ textarea {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.inline{
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-}
-.query.height {
-  line-height: 34px;
-  margin-left: 26px;
-  padding: 0;
-  width: 115px;
-}
-.el-table {
-  border-color: #dfdfdf !important;
-}
-.el-table--border::after,
-.el-table--group::after,
-.el-table::before {
-  background-color:transparent;
-}
-.el-header{
-   padding: 0;
-}
- .el-table .el-table__body-wrapper::-webkit-scrollbar {
-  width:10px;
-}
-.el-table .el-table__body-wrapper::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background:#DFDFDF;
-}
-.activeArea .el-table__body-wrapper::-webkit-scrollbar-track,
-.activeRange .el-table__body-wrapper::-webkit-scrollbar-track,
-.informationList .el-table__body-wrapper::-webkit-scrollbar-track,
-.inputMiddle .el-table__body-wrapper::-webkit-scrollbar-track {
-  border-radius: 0;
-  background:#FAFAFA;
-}
-
 
 input::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {

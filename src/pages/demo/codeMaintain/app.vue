@@ -5,11 +5,28 @@
     <div class="code_maintain">
       <div class="baseInformation">
         <div class="info_item">
-          <span class="info_title">活动名称</span>
+          <span class="info_title">code名称</span>
           <el-input class='info_detail'
+            v-model.tirm="param.codeName"
             clearable
-            placeholder="请输入内容"></el-input>
+            placeholder="请输入内容"
+          ></el-input>
         </div>
+        <div class="info_item">
+          <span class="info_title">code类型</span>
+          <el-select class='info_detail'
+            v-model="param.codeType"
+            placeholder=" - 请选择 -"
+          >
+            <el-option v-for="item in code_type_list_less"
+              :key="item.id"
+              :label="item.remark"
+              :value="item.codeType"
+            ></el-option>
+          </el-select>
+        </div>
+        <div class="info_item"></div>
+        <div class="info_item"></div>
         <div class="info_item"></div>
         <div class="info_item">
           <button class="btn hand" @click="query_data">查询</button>
@@ -18,16 +35,44 @@
       </div>
 
       <div class="operate">
-        <div class="add hand" @click="add_show=true">新增</div>
+        <div class="add hand" @click="add_code">新增</div>
       </div>
+
+      <el-table
+        :data="code_list"
+      >
+        <el-table-column
+          prop="codeTypeName"
+          label="code类型"
+        ></el-table-column>
+        <el-table-column
+          prop="codeName"
+          label="code名称"
+        ></el-table-column>
+        <el-table-column
+          prop="remark"
+          label="备注">
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="200">
+          <template slot-scope="scope">
+            <el-button type="text" size="small" @click.native="edit(scope.row)">编辑</el-button>
+            <el-button  type="text" size="small">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
       <el_dialog v-model="add_show" @confirm="confirm">
         <div class="baseInformation dialog">
           <div class="info_item middle">
             <span class="info_title">code类型</span>
             <el-select class='info_detail'
               v-model="add_data.codeType"
+              :disabled="Boolean(add_data.id)"
               placeholder=" - 请选择 -"
-              value-key="id"
+              value-key="codeType"
             >
               <el-option v-for="item in code_type_list"
                 :key="item.id"
@@ -95,6 +140,7 @@ export default {
       },
       add_show:false,
       code_type_list:[],
+      code_type_list_less:[],
       add_data:{
         codeTypeName:'',
         codeType:{},
@@ -103,11 +149,16 @@ export default {
         max_code_type:1000,
       },
       code_list:[],
+      param:{
+        codeName:undefined,
+        codeType:undefined,
+      }
     };
   },
   created() {
     this.open().then(()=>{
       this.get_code_type_list();
+      this.query_data();
     })
   },
   methods: {
@@ -125,6 +176,7 @@ export default {
             arr.push(itm)
           }
         });
+        this.code_type_list_less = Array.prototype.slice.call(arr);
         arr.push({
           codeType:1000,
           id:1,
@@ -150,6 +202,11 @@ export default {
         this.message('备注必填');
         return;
       }
+      if(this.add_data.id) { //更新
+        this.update_code();
+        return;
+      }
+
       let param = {
         codeName:this.add_data.codeName,
         remark:this.add_data.remark
@@ -159,6 +216,8 @@ export default {
         param.codeType = this.add_data.max_code_type + 1;
         param.code = +(param.codeType + '1001');
         this.add('t_code',param).then(res=>{
+          this.message('新增成功','success');
+          this.query_data();
           this.clear_add();
         });
         return;
@@ -171,14 +230,51 @@ export default {
           i.code > max_code && (max_code = i.code);
         });
         param.code = max_code + 1;
-        console.log("object",param);
         this.add('t_code',param).then(res=>{
+          this.message('新增成功','success');
+          this.query_data();
           this.clear_add();
         });
       })
     },
+    add_code(){
+      this.add_show = true;
+      this.add_data={
+        codeTypeName:'',
+        codeType:{},
+        codeName:'',
+        remark:'',
+        max_code_type:1000,
+      };
+    },
+    edit(data){
+      // console.log("object",data);
+      this.add_data = {
+        id:data.id,
+        code:data.code,
+        codeName:data.codeName,
+        codeTypeName:data.codeTypeName,
+        codeType:{codeType:data.codeType},
+        remark:data.remark,
+      }
+      this.add_show = true;
+    },
+    update_code(){
+      let param = {
+        id:this.add_data.id,
+        code:this.add_data.code,
+        codeName:this.add_data.codeName,
+        codeTypeName:this.add_data.codeTypeName,
+        codeType:this.add_data.codeType.codeType,
+        remark:this.add_data.remark,
+      };
+      this.update('t_code',param).then(()=>{
+        this.message('更新成功',"success");
+        this.clear_add();
+        this.query_data();
+      })
+    },
     clear_add(){
-      this.message('新增成功','success');
       this.get_code_type_list();
       this.add_data={
         codeTypeName:'',
@@ -189,9 +285,6 @@ export default {
       };
       this.add_show = false;
     }
-  },
-  computed: {
-    param:{}
   }
 };
 </script>
@@ -255,6 +348,16 @@ export default {
       line-height: 30px;
       color: #fff;
       border-radius: 3px;
+    }
+  }
+  .el-table {
+    margin-top: 15px;
+    border: 1px solid #dfdfdf;
+    .cell {
+      text-align: center;
+    }
+    thead th {
+      background: #EEF4FF;
     }
   }
 }
