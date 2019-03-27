@@ -16,11 +16,12 @@
             ></el-option>
           </el-select>
         </div>
-        <t_code_query_option
+        <component
+          :is="`${db.stores[store].name}_query_option`"
           :db_store="db_store"
           ref="query"
           :param="param"
-        ></t_code_query_option>
+        ></component>
 
         <div class="df">
           <div class="info_item"></div>
@@ -66,11 +67,12 @@
       ></el-pagination>
 
       <el_dialog v-model="add_show" @confirm="confirm">
-        <t_code_edit
+        <component
+          :is="`${db.stores[store].name}_edit`"
           :db_store="db_store"
           ref="edit"
           :add_data="add_data"
-        ></t_code_edit>
+        ></component>
       </el_dialog>
     </div>
   </el-main>
@@ -123,10 +125,7 @@ export default {
         max_code_type:1000,
       },
       code_list:[],
-      param:{
-        codeName:undefined,
-        codeType:undefined,
-      },
+      param:{},
       page_dto:{
         total:1,
         currentPage:1,
@@ -142,9 +141,9 @@ export default {
   },
   methods: {
     update(){
-      this.$refs.query.init();
+      this.$refs.query.init && this.$refs.query.init();
       setTimeout(() => {
-        this.$refs.edit && this.$refs.edit.init();
+        this.$refs.edit && this.$refs.edit.init && this.$refs.edit.init();
       });
     },
     paginationChange(val){
