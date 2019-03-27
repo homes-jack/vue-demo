@@ -1,6 +1,6 @@
 export default {
   methods: {
-    open() {
+    db_open() {
       let _this = this;
       return new Promise((reslove,rej)=>{
         let request = window.indexedDB.open(this.db.name, this.db.version);
@@ -16,11 +16,11 @@ export default {
         };
         request.onupgradeneeded = function(e) {
           _this.db_store = e.target.result;
-          _this.create_store();
+          _this.db_create_store();
         };
       })
     },
-    create_store() { //创建表
+    db_create_store() { //创建表
       let db = this.db_store;
       this.db.stores.forEach(store=>{
         if (db.objectStoreNames.contains(store.name)) return;
@@ -32,15 +32,15 @@ export default {
         })
       })
     },
-    create_transaction(db, store = 'person', mode = "readwrite") { //创建事务
-      return db.transaction(Array.from(db.objectStoreNames), mode).objectStore(store)
+    db_create_transaction(db, store = 'person', mode = "readwrite") { //创建事务
+      return db.transaction(store, mode).objectStore(store)
     },
     //新增
-    add(store='person',data={id:2,name:'name2',pass_word:'pass_word2'}){
+    db_add(store='person',data={id:2,name:'name2',pass_word:'pass_word2'}){
       let db = this.db_store;
       data.id = new Date().getTime();
       return new Promise((reslove,rej)=>{
-        let request = this.create_transaction(db,store).add(data);
+        let request = this.db_create_transaction(db,store).add(data);
         request.onsuccess = function (e) {
           reslove(e)
         }
@@ -50,14 +50,18 @@ export default {
       })
     },
     //更新数据 data必须包涵id
-    update(store='person',data={id:1,name:'test11',pass_word:'pass1'}){
+    db_update(store = 'person', data = {
+        id: 1,
+        name: 'test11',
+        pass_word: 'pass1'
+      }) {
       let db = this.db_store;
       return new Promise((reslove,rej)=>{
         if(!data.id) {
           rej("data必须包涵id");
           return;
         }
-        let request = this.create_transaction(db,store).put(data);
+        let request = this.db_create_transaction(db,store).put(data);
         request.onsuccess = function(e) {
           reslove(e)
         };
@@ -66,10 +70,10 @@ export default {
         };
       })
     },
-    delete(store = 'person', key = 1) {
+    db_delete(store = 'person', key = 1) {
       let db = this.db_store;
       return new Promise((reslove, rej) => {
-        let request = this.create_transaction(db, store).delete(key) //主键
+        let request = this.db_create_transaction(db, store).delete(key) //主键
         request.onsuccess = function (e) {
           reslove(e)
         };
@@ -78,21 +82,30 @@ export default {
         };
       })
     },
-    query_data_by_options(store = "person",option={}) {
+    db_query_data_by_options(store = "person", option = {},page={}) {
       let db = this.db_store;
       let _this = this;
       return new Promise((reslove, rej) => {
-        let request = this.create_transaction(db, store).openCursor();
-        let out_arr = [];
+        let request = this.db_create_transaction(db, store).openCursor();
+        let out_dto = {
+          data:[],
+          total:1,
+          start:page.start || 0,
+          length:page.length,
+        };
+        let arr = [];
         request.onsuccess = function (e) {
           let cursor = e.target.result;
           if (cursor) {
-            if (_this.object_contrast(option, cursor.value)) {
-              out_arr.push(cursor.value);
+            if (_this.db_object_contrast(option, cursor.value)) {
+              arr.push(cursor.value);
             }
             cursor.continue();
           } else {
-            reslove(out_arr);
+            out_dto.total = arr.length;
+            let end = out_dto.length ? out_dto.start + out_dto.length:undefined;
+            out_dto.data = arr.slice(out_dto.start, end);
+            reslove(out_dto);
           }
         };
         request.onerror = function (e) {
@@ -100,10 +113,10 @@ export default {
         };
       })
     },
-    get(store = 'person',option={}) {
+    db_get(store = 'person', option = {}) {
       let db = this.db_store;
       return new Promise((reslove, rej) => {
-        let request = this.create_transaction(db, store)
+        let request = this.db_create_transaction(db, store)
         if(option.id) {
           request = request.get(option.id)
         }else {
@@ -124,7 +137,7 @@ export default {
       })
     },
     // 对象对比
-    object_contrast(op,ob) {
+    db_object_contrast(op, ob) {
       let op_keys = Object.keys(op);
       if (op_keys.length == 0) return true;
       let is_right = 0;

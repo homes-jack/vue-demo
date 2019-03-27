@@ -5,32 +5,30 @@
     <div class="code_maintain">
       <div class="baseInformation">
         <div class="info_item">
-          <span class="info_title">code名称</span>
-          <el-input class='info_detail'
-            v-model.tirm="param.codeName"
-            clearable
-            placeholder="请输入内容"
-          ></el-input>
-        </div>
-        <div class="info_item">
-          <span class="info_title">code类型</span>
+          <span class="info_title">表</span>
           <el-select class='info_detail'
-            v-model="param.codeType"
-            placeholder=" - 请选择 -"
+            v-model="store"
           >
-            <el-option v-for="item in code_type_list_less"
-              :key="item.id"
-              :label="item.remark"
-              :value="item.codeType"
+            <el-option v-for="(item,index) in db.stores"
+              :key="index"
+              :label="item.name"
+              :value="index"
             ></el-option>
           </el-select>
         </div>
-        <div class="info_item"></div>
-        <div class="info_item"></div>
-        <div class="info_item"></div>
-        <div class="info_item">
-          <button class="btn hand" @click="query_data">查询</button>
-          <button class="btn hand">清空</button>
+        <t_code_query_option
+          :db_store="db_store"
+          ref="query"
+          :param="param"
+        ></t_code_query_option>
+
+        <div class="df">
+          <div class="info_item"></div>
+          <div class="info_item"></div>
+          <div class="info_item">
+            <button class="btn hand" @click="query_data(1)">查询</button>
+            <!-- <button class="btn hand">清空</button> -->
+          </div>
         </div>
       </div>
 
@@ -42,70 +40,37 @@
         :data="code_list"
       >
         <el-table-column
-          prop="codeTypeName"
-          label="code类型"
+          v-for="(key,index) in store_keys"
+          :key="index"
+          :prop="key"
+          :label="key"
         ></el-table-column>
-        <el-table-column
-          prop="codeName"
-          label="code名称"
-        ></el-table-column>
-        <el-table-column
-          prop="remark"
-          label="备注">
-        </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"
           width="200">
           <template slot-scope="scope">
             <el-button type="text" size="small" @click.native="edit(scope.row)">编辑</el-button>
-            <el-button  type="text" size="small">删除</el-button>
+            <el-button  type="text" size="small" @click.native="del(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        layout="total, sizes,->, prev, pager, next, jumper"
+        :page-sizes="[5,10, 20, 50, 100]"
+        :total="page_dto.total"
+        :current-page='page_dto.currentPage'
+        :pageSize="page_dto.pageSize"
+        @current-change='paginationChange'
+        @size-change="handleSizeChange"
+      ></el-pagination>
 
       <el_dialog v-model="add_show" @confirm="confirm">
-        <div class="baseInformation dialog">
-          <div class="info_item middle">
-            <span class="info_title">code类型</span>
-            <el-select class='info_detail'
-              v-model="add_data.codeType"
-              :disabled="Boolean(add_data.id)"
-              placeholder=" - 请选择 -"
-              value-key="codeType"
-            >
-              <el-option v-for="item in code_type_list"
-                :key="item.id"
-                :label="item.remark"
-                :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <div class="info_item middle" v-if="add_data.codeType.codeType == 1000">
-            <span class="info_title">code类型名称</span>
-            <el-input class='info_detail'
-              v-model.trim="add_data.codeTypeName"
-              clearable
-              placeholder="请输入内容"
-            ></el-input>
-          </div>
-          <div class="info_item middle">
-            <span class="info_title">code名称</span>
-            <el-input class='info_detail'
-              v-model.trim="add_data.codeName"
-              clearable
-              placeholder="请输入内容"
-            ></el-input>
-          </div>
-          <div class="info_item middle">
-            <span class="info_title">备注</span>
-            <el-input class='info_detail'
-              v-model.trim="add_data.remark"
-              clearable
-              placeholder="请输入内容"
-            ></el-input>
-          </div>
-        </div>
+        <t_code_edit
+          :db_store="db_store"
+          ref="edit"
+          :add_data="add_data"
+        ></t_code_edit>
       </el_dialog>
     </div>
   </el-main>
@@ -116,31 +81,40 @@
 <script>
 import { indexedDB,message } from "../../../common/mixinx";
 import el_dialog from "@/components/el_dialog.vue";
+import t_code_query_option from "@/components/t_code/query_option.vue"
+import t_code_edit from "@/components/t_code/edit.vue"
 export default {
   name: "codeMaintain",
   mixins: [indexedDB,message],
   components: {
-    el_dialog
+    el_dialog,t_code_query_option,t_code_edit
   },
   data() {
     return {
-      db: {
+      db: { //数据库配置
         name: "test",
         version: 1,
         stores: [{
           name:'t_code', //表名
           keys:{        //主键id 默认
-            code: true, //键名:是否包含重复的值
+            codeTypeName:false,//键名:是否包含重复的值
             codeType: false,
-            codeTypeName:false,
             codeName: false,
+            code: true,
+            remark:false,
+          }
+        },{
+          name:'t_page', //表名
+          keys:{        //主键id 默认
+            pageName: false, //键名:是否包含重复的值
+            pageurl: false,
             remark:false,
           }
         }]
       },
+      db_store:null,  //表操作对象
+      store:0,  //表
       add_show:false,
-      code_type_list:[],
-      code_type_list_less:[],
       add_data:{
         codeTypeName:'',
         codeType:{},
@@ -152,37 +126,43 @@ export default {
       param:{
         codeName:undefined,
         codeType:undefined,
+      },
+      page_dto:{
+        total:1,
+        currentPage:1,
+        pageSize:5,
       }
     };
   },
   created() {
-    this.open().then(()=>{
-      this.get_code_type_list();
+    this.db_open().then(()=>{
+      this.update();
       this.query_data();
     })
   },
   methods: {
-    query_data(){
-      this.query_data_by_options('t_code',this.param).then(res=>{
-        this.code_list = res;
-      })
+    update(){
+      this.$refs.query.init();
+      setTimeout(() => {
+        this.$refs.edit && this.$refs.edit.init();
+      });
     },
-    get_code_type_list(){
-      this.query_data_by_options('t_code').then(res=>{
-        let arr = [];
-        res.forEach(itm=>{
-          itm.codeType > this.add_data.max_code_type && (this.add_data.max_code_type = itm.codeType);
-          if(!arr.some(i=>i.codeType == itm.codeType)){
-            arr.push(itm)
-          }
-        });
-        this.code_type_list_less = Array.prototype.slice.call(arr);
-        arr.push({
-          codeType:1000,
-          id:1,
-          remark:"新增code类型",
-        })
-        this.code_type_list = arr;
+    paginationChange(val){
+      this.page_dto.currentPage = val;
+      this.query_data();
+    },
+    handleSizeChange(val){
+      this.page_dto.pageSize = val;
+      this.page_dto.currentPage = 1;
+      this.query_data();
+    },
+    query_data(page){
+      if(page)this.page_dto.currentPage = page;
+      this.db_query_data_by_options(this.db.stores[this.store].name,this.param,this.option_page).then(res=>{
+        this.code_list = res.data;
+        this.page_dto.total = res.total;
+      }).catch((e)=>{
+        this.message('查询错误');
       })
     },
     confirm(){
@@ -215,36 +195,43 @@ export default {
         param.codeTypeName = this.add_data.codeTypeName;
         param.codeType = this.add_data.max_code_type + 1;
         param.code = +(param.codeType + '1001');
-        this.add('t_code',param).then(res=>{
+        this.db_add(this.db.stores[this.store].name,param).then(res=>{
           this.message('新增成功','success');
+          this.$refs.query.init();
           this.query_data();
           this.clear_add();
+        }).catch(e=>{
+          console.error(e);
+          this.message('新增失败');
         });
         return;
       }
       param.codeTypeName = this.add_data.codeType.codeTypeName;
       param.codeType = this.add_data.codeType.codeType;
-      this.query_data_by_options('t_code',{codeType:param.codeType}).then(res=>{
+      this.db_query_data_by_options(this.db.stores[this.store].name,{codeType:param.codeType}).then(res=>{
         let max_code = -1;
-        res.forEach(i=>{
+        res.data.forEach(i=>{
           i.code > max_code && (max_code = i.code);
         });
         param.code = max_code + 1;
-        this.add('t_code',param).then(res=>{
+        this.db_add(this.db.stores[this.store].name,param).then(res=>{
           this.message('新增成功','success');
           this.query_data();
           this.clear_add();
-        });
-      })
+        })
+      }).catch(()=>{
+        this.message('新增失败');
+      });
     },
     add_code(){
+      this.update();
       this.add_show = true;
       this.add_data={
         codeTypeName:'',
         codeType:{},
         codeName:'',
         remark:'',
-        max_code_type:1000,
+        max_code_type:this.add_data.max_code_type,
       };
     },
     edit(data){
@@ -268,14 +255,16 @@ export default {
         codeType:this.add_data.codeType.codeType,
         remark:this.add_data.remark,
       };
-      this.update('t_code',param).then(()=>{
+      this.db_update(this.db.stores[this.store].name,param).then(()=>{
         this.message('更新成功',"success");
         this.clear_add();
         this.query_data();
+      }).catch(()=>{
+        this.message('更新失败');
       })
     },
     clear_add(){
-      this.get_code_type_list();
+      this.update();
       this.add_data={
         codeTypeName:'',
         codeType:{},
@@ -284,8 +273,29 @@ export default {
         max_code_type:1000,
       };
       this.add_show = false;
+    },
+    del(data) {
+      this.db_delete(this.db.stores[this.store].name,data.id).then(()=>{
+        this.message('删除成功','success');
+        this.update();
+        this.query_data();
+      }).catch(()=>{
+        this.message('删除失败');
+      })
     }
-  }
+  },
+  computed:{
+    option_page(){
+      return {
+        length:this.page_dto.pageSize,
+        start:this.page_dto.pageSize * (this.page_dto.currentPage -1)
+      }
+    },
+    store_keys(){
+      let keys = Object.keys(this.db.stores[this.store].keys);
+      return keys;
+    }
+  },
 };
 </script>
 
@@ -293,11 +303,15 @@ export default {
 .code_maintain {
   background: #fff;
   padding: 15px;
+  .df {
+    display: flex;
+    width: 100%;
+  }
   .baseInformation {
     display: flex;
     flex-wrap: wrap;
     border: 1px solid #ccc;
-    padding: 5px 30px 15px;
+    padding: 5px 20px 15px 0px;
     border-radius: 4px;
     &.dialog {
       padding: 0 10px 10px 0;
@@ -359,6 +373,9 @@ export default {
     thead th {
       background: #EEF4FF;
     }
+  }
+  .el-pagination {
+    padding-top: 15px;
   }
 }
 

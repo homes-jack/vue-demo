@@ -3,6 +3,7 @@
   class="el_dialog"
   :title="title"
   :visible.sync="dialogTableVisible"
+  width="70%"
 >
   <slot></slot>
   <div class="footer">
@@ -21,7 +22,7 @@ export default {
     },
     title:{
       type:String,
-      default:'新增code'
+      default:'字段编辑'
     },
   },
   data () {
