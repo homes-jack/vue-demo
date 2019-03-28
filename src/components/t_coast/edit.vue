@@ -28,6 +28,7 @@
     <div class="info_item middle">
       <span class="info_title">费用</span>
       <smcv-number-input class='info_detail'
+        mode="decimal"
         v-model.trim="add_data.coast"
         clearable
         placeholder="请输入内容"

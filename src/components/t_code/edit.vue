@@ -88,7 +88,8 @@ export default {
           codeTypeName:"新增code类型",
         })
         this.code_type_list = arr;
-      }).catch(()=>{
+      }).catch(e=>{
+        console.error(e);
         this.message('查询错误');
       })
     },
@@ -143,15 +144,18 @@ export default {
         });
         param.code = max_code + 1;
         this.$emit('confirm','add',param);
-      }).catch(()=>{
+      }).catch(e=>{
+        console.error(e);
         this.message('新增失败');
       });
-    }
+    },
   },
   watch: {
     add_data(now,old){
-      this.add_data.codeType = {
-        codeType:this.add_data.codeType
+      if(now.codeType && typeof now.codeType != 'object'){
+        this.add_data.codeType = {
+          codeType:this.add_data.codeType
+        }
       }
     }
   }

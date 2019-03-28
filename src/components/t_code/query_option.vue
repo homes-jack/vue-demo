@@ -60,6 +60,7 @@ export default {
         });
         this.code_type_list_less = arr;
       }).catch((e)=>{
+        console.error(e);
         this.message('查询错误');
       })
     },

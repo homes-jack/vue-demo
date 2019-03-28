@@ -117,7 +117,7 @@ const config = {
   ],
   devServer: {
     host: '0.0.0.0',
-    port: 8010,
+    port: 8011,
     historyApiFallback: false,
     noInfo: true,
     proxy: {

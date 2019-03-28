@@ -144,10 +144,13 @@ export default {
   },
   methods: {
     update(){
-      setTimeout(() => {
-        this.$refs.query.init && this.$refs.query.init();
-        this.$refs.edit && this.$refs.edit.init && this.$refs.edit.init();
-      });
+      return new Promise((reslove,rej)=>{
+        setTimeout(() => {
+          this.$refs.query.init && this.$refs.query.init();
+          this.$refs.edit && this.$refs.edit.init && this.$refs.edit.init();
+          reslove();
+        });
+      })
     },
     paginationChange(val){
       this.page_dto.currentPage = val;
@@ -164,6 +167,7 @@ export default {
         this.data_list = res.data;
         this.page_dto.total = res.total;
       }).catch((e)=>{
+        console.error(e)
         this.message('查询错误');
       })
     },
@@ -187,13 +191,26 @@ export default {
           this.clear_add();
           this.query_data();
         }).catch(()=>{
+          console.error(e);
           this.message('更新失败');
         })
       }
     },
     add_code(){
-      this.update();
-      this.add_show = true;
+      Object.keys(this.add_data).forEach(key=>{
+        if(this.add_data[key] instanceof Array) {
+          this.add_data[key] = [];
+          return;
+        }
+        if(typeof this.add_data[key] == 'object') {
+          this.add_data[key] = {};
+          return;
+        }
+        this.add_data[key] = ''
+      })
+      this.update().then(()=>{
+        this.add_show = true;
+      });
     },
     edit(data){
       // console.log("object",data);
@@ -201,15 +218,16 @@ export default {
       this.add_show = true;
     },
     clear_add(){
-      this.update();
-      this.add_data={
-        codeTypeName:'',
-        codeType:{},
-        codeName:'',
-        remark:'',
-        max_code_type:1000,
-      };
-      this.add_show = false;
+      this.update().then(()=>{
+        this.add_data={
+          codeTypeName:'',
+          codeType:{},
+          codeName:'',
+          remark:'',
+          max_code_type:1000,
+        };
+        this.add_show = false;
+      });
     },
     del(data) {
       this.$confirm('是否删除?', '提示', {
@@ -221,7 +239,8 @@ export default {
           this.message('删除成功','success');
           this.update();
           this.query_data();
-        }).catch(()=>{
+        }).catch(e=>{
+          console.error(e);
           this.message('删除失败');
         })
       }).catch(()=>{})
