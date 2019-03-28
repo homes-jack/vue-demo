@@ -7,7 +7,7 @@ var assetsPublicPath={
   development:"/",
   dev: "http://testdms.maxuscloud.cn/web/amp/",
   uat: "https://test34.maxuscloud.cn/web/amp/",
-  production: "https://xyx.saicmaxus.com/web/amp/",
+  production: "http://39.104.176.9/hzh/",
   sitb: 'https://test102.maxuscloud.cn/web/amp/'
 }
 const { join, resolve } = require('path')
@@ -80,7 +80,7 @@ rulesArr = rulesArr.concat(utils.styleLoaders({sourceMap: true, usePostCSS: true
 const config = {
   entry: entries,
   output: {
-    path: resolve(__dirname, './amp'),
+    path: resolve(__dirname, './hzh'),
     filename: 'assets/js/[name].js',
     publicPath: assetsPublicPath[process.env.NODE_ENV]
   },
