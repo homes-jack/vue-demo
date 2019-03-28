@@ -38,7 +38,7 @@
       </div>
 
       <el-table
-        :data="code_list"
+        :data="data_list"
       >
         <el-table-column
           v-for="(key,index) in store_keys"
@@ -66,14 +66,14 @@
         @size-change="handleSizeChange"
       ></el-pagination>
 
-      <el_dialog v-model="add_show" @confirm="confirm">
-        <component
-          :is="`${db.stores[store].name}_edit`"
-          :db_store="db_store"
-          ref="edit"
-          :add_data="add_data"
-        ></component>
-      </el_dialog>
+      <component
+        v-model="add_show"
+        :is="`${db.stores[store].name}_edit`"
+        :db_store="db_store"
+        ref="edit"
+        :add_data="add_data"
+        @confirm="confirm"
+      ></component>
     </div>
   </el-main>
 </el-container>
@@ -82,14 +82,15 @@
 
 <script>
 import { indexedDB,message } from "../../../common/mixinx";
-import el_dialog from "@/components/el_dialog.vue";
 import t_code_query_option from "@/components/t_code/query_option.vue"
+import t_coast_query_option from "@/components/t_coast/query_option.vue"
+import t_coast_edit from "@/components/t_coast/edit.vue"
 import t_code_edit from "@/components/t_code/edit.vue"
 export default {
   name: "codeMaintain",
   mixins: [indexedDB,message],
   components: {
-    el_dialog,t_code_query_option,t_code_edit
+    t_code_query_option,t_code_edit,t_coast_query_option,t_coast_edit
   },
   data() {
     return {
@@ -106,10 +107,12 @@ export default {
             remark:false,
           }
         },{
-          name:'t_page', //表名
+          name:'t_coast', //表名
           keys:{        //主键id 默认
-            pageName: false, //键名:是否包含重复的值
-            pageurl: false,
+            typeName:false,//key不能使用 _
+            type:false,
+            date: false,  //日期筛选使用start_[key]/end_[key]
+            coast: false,
             remark:false,
           }
         }]
@@ -124,7 +127,7 @@ export default {
         remark:'',
         max_code_type:1000,
       },
-      code_list:[],
+      data_list:[],
       param:{},
       page_dto:{
         total:1,
@@ -141,8 +144,8 @@ export default {
   },
   methods: {
     update(){
-      this.$refs.query.init && this.$refs.query.init();
       setTimeout(() => {
+        this.$refs.query.init && this.$refs.query.init();
         this.$refs.edit && this.$refs.edit.init && this.$refs.edit.init();
       });
     },
@@ -158,109 +161,44 @@ export default {
     query_data(page){
       if(page)this.page_dto.currentPage = page;
       this.db_query_data_by_options(this.db.stores[this.store].name,this.param,this.option_page).then(res=>{
-        this.code_list = res.data;
+        this.data_list = res.data;
         this.page_dto.total = res.total;
       }).catch((e)=>{
         this.message('查询错误');
       })
     },
-    confirm(){
-      if(!this.add_data.codeType.codeType) {
-        this.message('code类型必填');
-        return;
-      }
-      if(this.add_data.codeType.codeType == 1000 && !this.add_data.codeTypeName) {
-        this.message('code类型名称必填');
-        return;
-      }
-      if(!this.add_data.codeName) {
-        this.message('code名称必填');
-        return;
-      }
-      if(!this.add_data.remark) {
-        this.message('备注必填');
-        return;
-      }
-      if(this.add_data.id) { //更新
-        this.update_code();
-        return;
-      }
-
-      let param = {
-        codeName:this.add_data.codeName,
-        remark:this.add_data.remark
-      };
-      if(this.add_data.codeType.codeType == 1000) {
-        param.codeTypeName = this.add_data.codeTypeName;
-        param.codeType = this.add_data.max_code_type + 1;
-        param.code = +(param.codeType + '1001');
+    confirm(type,param){
+      if(type == 'add') {
         this.db_add(this.db.stores[this.store].name,param).then(res=>{
           this.message('新增成功','success');
-          this.$refs.query.init();
+          this.update();
           this.query_data();
           this.clear_add();
         }).catch(e=>{
           console.error(e);
           this.message('新增失败');
         });
-        return;
       }
-      param.codeTypeName = this.add_data.codeType.codeTypeName;
-      param.codeType = this.add_data.codeType.codeType;
-      this.db_query_data_by_options(this.db.stores[this.store].name,{codeType:param.codeType}).then(res=>{
-        let max_code = -1;
-        res.data.forEach(i=>{
-          i.code > max_code && (max_code = i.code);
-        });
-        param.code = max_code + 1;
-        this.db_add(this.db.stores[this.store].name,param).then(res=>{
-          this.message('新增成功','success');
-          this.query_data();
+
+      if(type == "update") {
+        this.db_update(this.db.stores[this.store].name,param).then(()=>{
+          this.message('更新成功',"success");
+          this.update();
           this.clear_add();
+          this.query_data();
+        }).catch(()=>{
+          this.message('更新失败');
         })
-      }).catch(()=>{
-        this.message('新增失败');
-      });
+      }
     },
     add_code(){
       this.update();
       this.add_show = true;
-      this.add_data={
-        codeTypeName:'',
-        codeType:{},
-        codeName:'',
-        remark:'',
-        max_code_type:this.add_data.max_code_type,
-      };
     },
     edit(data){
       // console.log("object",data);
-      this.add_data = {
-        id:data.id,
-        code:data.code,
-        codeName:data.codeName,
-        codeTypeName:data.codeTypeName,
-        codeType:{codeType:data.codeType},
-        remark:data.remark,
-      }
+      this.add_data = JSON.parse(JSON.stringify(data));
       this.add_show = true;
-    },
-    update_code(){
-      let param = {
-        id:this.add_data.id,
-        code:this.add_data.code,
-        codeName:this.add_data.codeName,
-        codeTypeName:this.add_data.codeTypeName,
-        codeType:this.add_data.codeType.codeType,
-        remark:this.add_data.remark,
-      };
-      this.db_update(this.db.stores[this.store].name,param).then(()=>{
-        this.message('更新成功',"success");
-        this.clear_add();
-        this.query_data();
-      }).catch(()=>{
-        this.message('更新失败');
-      })
     },
     clear_add(){
       this.update();
@@ -274,13 +212,26 @@ export default {
       this.add_show = false;
     },
     del(data) {
-      this.db_delete(this.db.stores[this.store].name,data.id).then(()=>{
-        this.message('删除成功','success');
-        this.update();
-        this.query_data();
-      }).catch(()=>{
-        this.message('删除失败');
-      })
+      this.$confirm('是否删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(()=>{
+        this.db_delete(this.db.stores[this.store].name,data.id).then(()=>{
+          this.message('删除成功','success');
+          this.update();
+          this.query_data();
+        }).catch(()=>{
+          this.message('删除失败');
+        })
+      }).catch(()=>{})
+    }
+  },
+  watch: {
+    store(now,old){
+      this.param = {};
+      this.query_data(1);
+      this.update();
     }
   },
   computed:{

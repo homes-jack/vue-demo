@@ -142,13 +142,33 @@ export default {
       if (op_keys.length == 0) return true;
       let is_right = 0;
       op_keys.forEach(key=>{
+        if (!op[key] && (op[key] !== 0)) { //空值
+          is_right++;
+          return;
+        }
+
+        if (key.includes('date')) {
+          let type = key.split('_');
+          const key_ob = type[1];
+          type = type[0];
+          if(type == 'start' && op[key] <= ob[key_ob]) {
+            is_right++;
+          }
+          if (type == 'end' && op[key] >= ob[key_ob]) {
+            is_right++;
+          }
+          return;
+        }
+
         if (typeof op[key] == "number" && op[key] == ob[key]) {
           is_right++;
+          return;
         }
+
         if (typeof op[key] == "string" && (ob[key]+'').includes(op[key])) {
           is_right++;
+          return;
         }
-        if(typeof op[key] == 'undefined') is_right++;
       });
       return is_right >= op_keys.length;
     }

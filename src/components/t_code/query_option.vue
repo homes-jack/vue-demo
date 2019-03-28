@@ -17,7 +17,7 @@
       >
         <el-option v-for="item in code_type_list_less"
           :key="item.id"
-          :label="item.remark"
+          :label="item.codeTypeName"
           :value="item.codeType"
         ></el-option>
       </el-select>
