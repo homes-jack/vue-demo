@@ -24,7 +24,10 @@
       <div class="fire"></div>
     </div>
     <div class="filter_demo demo5">
-      文字融合文字融合文字融合
+      <div>文字融合文字融合文字融合</div>
+    </div>
+    <div class="filter_demo demo6">
+      <span>WATER-DROP</span>
     </div>
   </div>
 </template>
@@ -156,15 +159,62 @@ export default {
     }
   }
   .demo5 {
-    width: 600px;
+    width: 100%;
+    margin-top: 20px;
     background: #000;
     color: #fff;
-    font-size: 30px;
+    font-size: 70px;
     line-height: 200px;
     text-align: center;
-    letter-spacing: 5px;
-    filter: blur(0px);
-    animation: words 4s ease infinite;
+    filter: contrast(20);
+    div {
+      filter: blur(0px);
+      letter-spacing: 5px;
+      animation: words 4s ease infinite;
+    }
+  }
+  .demo6 {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    font-size: 75px;  //字体大小太小文字无法看清
+    line-height: 200px;
+    text-align: center;
+    filter: blur(3px) contrast(10);
+    span {
+      position: relative;
+      border-bottom: 5px solid #fff;
+    }
+    span::before {
+      content: "";
+      position: absolute;
+      width:10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      transform:translateY(15px) scaleX(.8);
+      opacity: 1;
+      bottom: 0;
+      left: 0;
+      animation: drop 4s ease-in-out infinite;
+    }
+  }
+}
+@keyframes drop {
+  0%{
+    left:0;
+    opacity: 1;
+    bottom: 0;
+  }
+  40%{
+    left: calc(100% - 10px);
+    opacity: 1;
+    bottom: 0;
+  }
+  100%{
+    left: 100%;
+    opacity: 0;
+    bottom: -30px;
   }
 }
 @keyframes words {
@@ -173,7 +223,7 @@ export default {
     filter: blur(0px);
   }
   50% {
-    letter-spacing: -30px;
+    letter-spacing: -70px;
     filter: blur(8px);
   }
   100% {
