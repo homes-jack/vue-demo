@@ -5,7 +5,7 @@ if(process.env.NODE_ENV!=='development'){
 }
 var assetsPublicPath={
   development:"/",
-  dev: "http://testdms.maxuscloud.cn/web/amp/",
+  dev: "http://39.104.176.9/hzh/",
   uat: "https://test34.maxuscloud.cn/web/amp/",
   production: "http://39.104.176.9/hzh/",
   sitb: 'https://test102.maxuscloud.cn/web/amp/'

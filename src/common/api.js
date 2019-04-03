@@ -2,17 +2,11 @@ import ajax from './ajax'
 import qs from 'qs'
 const baseUrl = {
   serverLmp: {
-    dev: 'http://testdms.maxuscloud.cn/ampService',
+    dev: 'http://39.104.176.9/hzh/',
     uat: 'https://test34.maxuscloud.cn/ampService',
     production: 'https://xyx.saicmaxus.com/ampService',
     sitb: 'https://test102.maxuscloud.cn/ampService'
   },
-  authUrl: {
-    dev: 'http://testdms.maxuscloud.cn/auth',
-    uat: 'https://test34.maxuscloud.cn/auth',
-    production: 'https://xyx.saicmaxus.com/auth',
-    sitb: 'https://test102.maxuscloud.cn/auth'
-  }
 }
 
 export const getUrlParams = (param) => {
