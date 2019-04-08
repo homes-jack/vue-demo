@@ -49,6 +49,7 @@
 import el_dialog from "@/components/el_dialog.vue";
 import SmcvNumberInput from "@/components/smcvNumberInput.vue";
 import { indexedDB,message,store_edit } from "@/common/mixinx";
+import { handDate } from "@/common/utils";
 export default {
   name:'t_coast_edit',
   mixins: [indexedDB,message,store_edit],
@@ -70,6 +71,11 @@ export default {
   data () {
     return {
       code_type_list:[],
+    }
+  },
+  updated () {
+    if(!this.add_data.date) {
+      this.add_data.date = handDate(new Date());
     }
   },
   methods: {
@@ -111,6 +117,13 @@ export default {
         return;
       }
       this.$emit('confirm','add',param);
+    }
+  },
+  watch: {
+    "add_data.coast"(val){
+      if(val == 5) {
+        this.add_data.remark = '鸡蛋饼'
+      }
     }
   }
 }
