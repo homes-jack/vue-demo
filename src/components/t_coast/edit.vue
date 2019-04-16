@@ -75,7 +75,7 @@ export default {
   },
   updated () {
     if(!this.add_data.date) {
-      this.add_data.date = handDate(new Date());
+      this.$set(this.add_data,"date",handDate(new Date()))
     }
   },
   methods: {
