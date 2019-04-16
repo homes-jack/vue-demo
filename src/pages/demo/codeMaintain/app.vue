@@ -35,6 +35,7 @@
 
       <div class="operate">
         <div class="add hand" @click="add_code">新增</div>
+        <div class="add hand" @click="log_out">导出数据</div>
       </div>
 
       <el-table
@@ -150,6 +151,11 @@ export default {
           this.$refs.edit && this.$refs.edit.init && this.$refs.edit.init();
           reslove();
         });
+      })
+    },
+    log_out(){
+      this.db_query_data_by_options(this.db.stores[this.store].name,this.param).then(res=>{
+        console.log("object",res.data);
       })
     },
     paginationChange(val){
